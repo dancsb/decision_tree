@@ -1,3 +1,19 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Scanner;
+
+class Data{
+	ArrayList<ArrayList<Integer>> features;
+	ArrayList<Boolean> labels;
+
+	public Data(ArrayList<ArrayList<Integer>> features, ArrayList<Boolean> labels) {
+		this.features = features;
+		this.labels = labels;
+	}
+}
+
 public class Solution{
 
 	public static double getEntropy(int nCat1, int nCat2){
@@ -11,15 +27,15 @@ public class Solution{
 		int[] answer = {0, 0};
 		int P = 0; int N = 0; double E = Double.MAX_VALUE;
 
-		for (boolean label : labels)
+		for(boolean label : labels)
 			if (label) P++; else N++;
 
 		for(int col = 0; col < features[0].length; col++){
 			int p = 0; int n = 0;
 
 			for(int i = 0; i < features.length - 1; i++)
-				for (int j = i + 1; j < features.length; j++)
-					if (features[j][col] < features[i][col]) {
+				for(int j = i + 1; j < features.length; j++)
+					if(features[j][col] < features[i][col]) {
 						for(int k = 0; k < features[0].length; k++)
 							features[i][k] = features[i][k] ^ features[j][k] ^ (features[j][k] = features[i][k]);
 						labels[i] = labels[i] ^ labels[j] ^ (labels[j] = labels[i]);
@@ -40,7 +56,28 @@ public class Solution{
 		return answer;
 	}
 
-	public static void main(String[] args){
-		
+	public static Data fileRead(String f) throws FileNotFoundException {
+		ArrayList<ArrayList<Integer>> features = new ArrayList<>();
+		ArrayList<Boolean> labels = new ArrayList<>();
+		File file = new File(f);
+		Scanner sc = new Scanner(file);
+
+		while(sc.hasNextLine()) {
+			String s = sc.nextLine();
+			ArrayList<String> t = new ArrayList<>(Arrays.asList(s.split(",")));
+			if(t.get(t.size() - 1).equals("1")) labels.add(true); else labels.add(false);
+			t.remove(t.size() - 1);
+			features.add(new ArrayList<>());
+			t.forEach(a -> features.get(features.size() - 1).add(Integer.parseInt(a)));
+		}
+
+		sc.close();
+		return new Data(features, labels);
+	}
+
+	public static void main(String[] args) throws FileNotFoundException {
+		Data train = fileRead("train.csv");
+
+
 	}
 }

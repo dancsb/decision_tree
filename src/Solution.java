@@ -4,13 +4,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
-class Data{
+class Data {
 	ArrayList<ArrayList<Integer>> features;
 	ArrayList<Boolean> labels;
 
 	public Data(ArrayList<ArrayList<Integer>> features, ArrayList<Boolean> labels) {
 		this.features = features;
 		this.labels = labels;
+	}
+}
+
+class Node {
+	Node node; Data data;
+	int separationAttribute, separationThreshold, decision = -1;
+
+	public Node(Node node, Data data) {
+		this.node = node;
+		this.data = data;
 	}
 }
 
@@ -56,7 +66,7 @@ public class Solution{
 		return answer;
 	}
 
-	public static Data fileRead(String f) throws FileNotFoundException {
+	private static Data fileRead(String f, boolean train) throws FileNotFoundException {
 		ArrayList<ArrayList<Integer>> features = new ArrayList<>();
 		ArrayList<Boolean> labels = new ArrayList<>();
 		File file = new File(f);
@@ -65,8 +75,12 @@ public class Solution{
 		while(sc.hasNextLine()) {
 			String s = sc.nextLine();
 			ArrayList<String> t = new ArrayList<>(Arrays.asList(s.split(",")));
-			if(t.get(t.size() - 1).equals("1")) labels.add(true); else labels.add(false);
-			t.remove(t.size() - 1);
+
+			if(train) {
+				if(t.get(t.size() - 1).equals("1")) labels.add(true); else labels.add(false);
+				t.remove(t.size() - 1);
+			}
+
 			features.add(new ArrayList<>());
 			t.forEach(a -> features.get(features.size() - 1).add(Integer.parseInt(a)));
 		}
@@ -75,9 +89,34 @@ public class Solution{
 		return new Data(features, labels);
 	}
 
+	private static boolean[] Booleans2booleans(ArrayList<Boolean> Booleans) {
+		boolean[] booleans = new boolean[Booleans.size()];
+		for(int i = 0; i < Booleans.size(); i++)
+			booleans[i] = Booleans.get(i);
+		return booleans;
+	}
+
+	private static Data[] separate(Data data) {
+		Data[] separated = {null, null};
+
+
+
+		return separated;
+	}
+
+	private static void buildTree(Node node) {
+		int[] answer = getBestSeparation((int[][]) node.data.features.stream().map(ArrayList::toArray).toArray(), Booleans2booleans(node.data.labels));
+		node.separationAttribute = answer[0];
+		node.separationThreshold = answer[1];
+
+
+	}
+
 	public static void main(String[] args) throws FileNotFoundException {
-		Data train = fileRead("train.csv");
+		Data train = fileRead("train.csv", true);
+		Data test = fileRead("test.csv", false);
 
-
+		Node node = new Node(null, train);
+		buildTree(node);
 	}
 }

@@ -3,6 +3,8 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 class Data {
 	int[][] features;
@@ -15,11 +17,10 @@ class Data {
 }
 
 class Node {
-	Node node; Data data;
+	Node[] nextNodes = {null, null}; Data data;
 	int separationAttribute, separationThreshold, decision = -1;
 
-	public Node(Node node, Data data) {
-		this.node = node;
+	public Node(Data data) {
 		this.data = data;
 	}
 }
@@ -100,27 +101,58 @@ public class Solution{
 		return booleans;
 	}
 
-	private static Data[] separate(Data data) {
+	private static Data[] separate(Data data, int separationAttribute, int separationThreshold) {
 		Data[] separated = {null, null};
+		ArrayList<ArrayList<Integer>> features1 = new ArrayList<>();
+		ArrayList<ArrayList<Integer>> features2 = new ArrayList<>();
+		ArrayList<Boolean> labels1 = new ArrayList<>();
+		ArrayList<Boolean> labels2 = new ArrayList<>();
 
+		for(int i = 0; i < data.features.length; i++)
+			if(data.features[i][separationAttribute] <= separationThreshold) {
+				features1.add(IntStream.of(data.features[i]).boxed().collect(Collectors.toCollection(ArrayList::new)));
+				labels1.add(data.labels[i]);
+			}
+			else {
+				features2.add(IntStream.of(data.features[i]).boxed().collect(Collectors.toCollection(ArrayList::new)));
+				labels2.add(data.labels[i]);
+			}
 
-
+		separated[0] = new Data((int[][]) features1.stream().map(ArrayList::toArray).toArray(), Booleans2booleans(labels1));
+		separated[1] = new Data((int[][]) features2.stream().map(ArrayList::toArray).toArray(), Booleans2booleans(labels2));
 		return separated;
 	}
 
-	private static void buildTree(Node node) {
+	private static int getDecision(Data data) {
+		for(int i = 1; i < data.labels.length; i++)
+			if((data.labels[i] != data.labels[0]))
+				return -1;
+
+		if(data.labels[0]) return 1; else return 0;
+	}
+
+	private static Node buildTree(Data data) {
+		Node node = new Node(data);
+
 		int[] answer = getBestSeparation(node.data.features, node.data.labels);
 		node.separationAttribute = answer[0];
 		node.separationThreshold = answer[1];
+		node.decision = getDecision(data);
 
+		if(node.decision == -1) {
+			sortByAttribute(node.data, node.separationAttribute);
+			Data[] separated = separate(node.data, node.separationAttribute, node.separationThreshold);
+			node.nextNodes[0] = buildTree(separated[0]);
+			node.nextNodes[1] = buildTree(separated[1]);
+		}
 
+		return node;
 	}
 
 	public static void main(String[] args) throws FileNotFoundException {
 		Data train = fileRead("train.csv", true);
 		Data test = fileRead("test.csv", false);
 
-		Node node = new Node(null, train);
-		buildTree(node);
+		Node node = buildTree(train);
 	}
 }

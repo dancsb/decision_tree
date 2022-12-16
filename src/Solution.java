@@ -160,7 +160,7 @@ public class Solution{
 
 		for(int i = 0; i < test.features.length; i++) {
 			Node currentNode = tree;
-			while (currentNode.decision == -1)
+			while(currentNode.decision == -1)
 				if(test.features[i][currentNode.separationAttribute] < currentNode.separationThreshold)
 					currentNode = currentNode.nextNodes[0];
 				else

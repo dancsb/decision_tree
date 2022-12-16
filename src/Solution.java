@@ -1,5 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -149,12 +151,24 @@ public class Solution{
 		return node;
 	}
 
-	public static void main(String[] args) throws FileNotFoundException {
+	public static void main(String[] args) throws IOException {
 		Data train = fileRead("train.csv", true);
 		Data test = fileRead("test.csv", false);
+		FileWriter fw = new FileWriter("results.csv");
 
-		Node fa = buildTree(train);
+		Node tree = buildTree(train);
 
+		for(int i = 0; i < test.features.length; i++) {
+			Node currentNode = tree;
+			while (currentNode.decision == -1)
+				if(test.features[i][currentNode.separationAttribute] < currentNode.separationThreshold)
+					currentNode = currentNode.nextNodes[0];
+				else
+					currentNode = currentNode.nextNodes[1];
 
+			fw.write(currentNode.decision + "\n");
+		}
+
+		fw.close();
 	}
 }

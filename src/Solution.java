@@ -5,10 +5,10 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 class Data {
-	ArrayList<ArrayList<Integer>> features;
-	ArrayList<Boolean> labels;
+	int[][] features;
+	boolean[] labels;
 
-	public Data(ArrayList<ArrayList<Integer>> features, ArrayList<Boolean> labels) {
+	public Data(int[][] features, boolean[] labels) {
 		this.features = features;
 		this.labels = labels;
 	}
@@ -43,13 +43,7 @@ public class Solution{
 		for(int col = 0; col < features[0].length; col++){
 			int p = 0; int n = 0;
 
-			for(int i = 0; i < features.length - 1; i++)
-				for(int j = i + 1; j < features.length; j++)
-					if(features[j][col] < features[i][col]) {
-						for(int k = 0; k < features[0].length; k++)
-							features[i][k] = features[i][k] ^ features[j][k] ^ (features[j][k] = features[i][k]);
-						labels[i] = labels[i] ^ labels[j] ^ (labels[j] = labels[i]);
-					}
+			sortByAttribute(new Data(features, labels), col);
 
 			for(int row = 0; row < features.length; row++) {
 				if(labels[row]) p++; else n++;
@@ -64,6 +58,16 @@ public class Solution{
 		}
 
 		return answer;
+	}
+
+	private static void sortByAttribute(Data data, int attribute) {
+		for(int i = 0; i < data.features.length - 1; i++)
+			for(int j = i + 1; j < data.features.length; j++)
+				if(data.features[j][attribute] < data.features[i][attribute]) {
+					for(int k = 0; k < data.features[0].length; k++)
+						data.features[i][k] = data.features[i][k] ^ data.features[j][k] ^ (data.features[j][k] = data.features[i][k]);
+					data.labels[i] = data.labels[i] ^ data.labels[j] ^ (data.labels[j] = data.labels[i]);
+				}
 	}
 
 	private static Data fileRead(String f, boolean train) throws FileNotFoundException {
@@ -86,7 +90,7 @@ public class Solution{
 		}
 
 		sc.close();
-		return new Data(features, labels);
+		return new Data((int[][]) features.stream().map(ArrayList::toArray).toArray(), Booleans2booleans(labels));
 	}
 
 	private static boolean[] Booleans2booleans(ArrayList<Boolean> Booleans) {
@@ -105,7 +109,7 @@ public class Solution{
 	}
 
 	private static void buildTree(Node node) {
-		int[] answer = getBestSeparation((int[][]) node.data.features.stream().map(ArrayList::toArray).toArray(), Booleans2booleans(node.data.labels));
+		int[] answer = getBestSeparation(node.data.features, node.data.labels);
 		node.separationAttribute = answer[0];
 		node.separationThreshold = answer[1];
 

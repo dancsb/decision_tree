@@ -71,10 +71,10 @@ public class Solution{
 				}
 	}
 
-	private static Data fileRead(String f, boolean train) throws FileNotFoundException {
+	private static Data fileRead(String filename, boolean train) throws FileNotFoundException {
 		ArrayList<ArrayList<Integer>> features = new ArrayList<>();
 		ArrayList<Boolean> labels = new ArrayList<>();
-		File file = new File(f);
+		File file = new File(filename);
 		Scanner sc = new Scanner(file);
 
 		while(sc.hasNextLine()) {
@@ -91,7 +91,7 @@ public class Solution{
 		}
 
 		sc.close();
-		return new Data((int[][]) features.stream().map(ArrayList::toArray).toArray(), Booleans2booleans(labels));
+		return new Data(features.stream().map(f -> f.stream().mapToInt(Integer::intValue).toArray()).toArray(int[][]::new), Booleans2booleans(labels));
 	}
 
 	private static boolean[] Booleans2booleans(ArrayList<Boolean> Booleans) {
@@ -118,8 +118,8 @@ public class Solution{
 				labels2.add(data.labels[i]);
 			}
 
-		separated[0] = new Data((int[][]) features1.stream().map(ArrayList::toArray).toArray(), Booleans2booleans(labels1));
-		separated[1] = new Data((int[][]) features2.stream().map(ArrayList::toArray).toArray(), Booleans2booleans(labels2));
+		separated[0] = new Data(features1.stream().map(f -> f.stream().mapToInt(Integer::intValue).toArray()).toArray(int[][]::new), Booleans2booleans(labels1));
+		separated[1] = new Data(features2.stream().map(f -> f.stream().mapToInt(Integer::intValue).toArray()).toArray(int[][]::new), Booleans2booleans(labels2));
 		return separated;
 	}
 
@@ -153,6 +153,8 @@ public class Solution{
 		Data train = fileRead("train.csv", true);
 		Data test = fileRead("test.csv", false);
 
-		Node node = buildTree(train);
+		Node fa = buildTree(train);
+
+
 	}
 }
